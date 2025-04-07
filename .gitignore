@@ -1,0 +1,20 @@
+# Node.js modules
+node_modules/
+
+# NeDB-databaser
+db/*.db
+
+# Miljövariabler
+.env
+
+# Loggfiler
+*.log
+
+# VSCode config
+.vscode/
+
+# macOS systemfiler
+.DS_Store
+
+# Windows systemfiler
+Thumbs.db
