@@ -7,6 +7,30 @@ import userDb from '../models/userModel.js';
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
+/**
+ * @swagger
+ * /api/user/signup:
+ *   post:
+ *     summary: Skapa ett nytt konto
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [username, password]
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Konto skapat
+ *       400:
+ *         description: Ogiltiga inloggningsuppgifter
+ */
+
 // POST /api/user/signup
 router.post('/signup', async (req, res) => {
     const { username, password } = req.body;
@@ -25,6 +49,38 @@ router.post('/signup', async (req, res) => {
 
     res.status(200).json({ message: 'Konto skapat' });
 });
+
+
+/**
+ * @swagger
+ * /api/user/login:
+ *   post:
+ *     summary: Logga in en användare och få en JWT-token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [username, password]
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Inloggning lyckades, JWT-token returneras
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Fel användarnamn eller lösenord
+ */
 
 // POST /api/user/login
 router.post('/login', async (req, res) => {

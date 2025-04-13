@@ -4,6 +4,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
 import noteRoutes from './routes/noteRoutes.js';
+import { setupSwagger } from './swagger.js';
+
+
+
 
 dotenv.config();
 
@@ -26,3 +30,6 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+
+setupSwagger(app);
