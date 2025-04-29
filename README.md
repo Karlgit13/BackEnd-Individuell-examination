@@ -10,6 +10,7 @@ Packages:
 "swagger-jsdoc": "^6.2.8",
 "swagger-ui-express": "^5.0.1"
 
+npm install
 npm run dev
 
 Swagger UI: http://localhost:3000/api-docs/
