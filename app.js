@@ -1,15 +1,14 @@
 // app.js
+import dotenv from 'dotenv';
+dotenv.config(); // ← allra först
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
 import noteRoutes from './routes/noteRoutes.js';
 import { setupSwagger } from './swagger.js';
 
 
 
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
