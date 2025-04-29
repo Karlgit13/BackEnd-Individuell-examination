@@ -1,14 +1,15 @@
 # BackEnd-Individuell-examination
 
-Packages:
-"bcryptjs": "^3.0.2",
-"cors": "^2.8.5",
-"dotenv": "^16.4.7",
-"express": "^5.1.0",
-"jsonwebtoken": "^9.0.2",
-"nedb-promises": "^6.2.3",
-"swagger-jsdoc": "^6.2.8",
-"swagger-ui-express": "^5.0.1"
+Packages: <br>
+
+"bcryptjs": "^3.0.2", <br>
+"cors": "^2.8.5",<br>
+"dotenv": "^16.4.7",<br>
+"express": "^5.1.0",<br>
+"jsonwebtoken": "^9.0.2",<br>
+"nedb-promises": "^6.2.3",<br>
+"swagger-jsdoc": "^6.2.8",<br>
+"swagger-ui-express": "^5.0.1"<br>
 
 npm install <br>
 npm run dev
