@@ -241,25 +241,26 @@ router.delete('/:id', authenticate, async (req, res) => {
 
 // GET /api/notes/search - Söka bland anteckningar efter titel
 router.get('/search', authenticate, async (req, res) => {
-    // Plockar ut sökordet från query-parametern
     const { title } = req.query;
 
-    // Kontrollerar att sökord är angivet
     if (!title) {
         return res.status(400).json({ error: 'Sökord saknas' });
     }
 
     try {
-        // Söker efter anteckningar där titeln matchar sökordet (case insensitive)
+        const regex = new RegExp(title, 'i'); // Skapa en riktig RegExp här!
+
         const notes = await noteDb.find({
             userId: req.user.id,
-            title: { $regex: title, $options: 'i' }, // $options: 'i' betyder "ignore case"
+            title: regex
         });
-        // Skickar tillbaka de matchande anteckningarna
+
         res.status(200).json(notes);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Kunde inte söka anteckningar' });
     }
 });
+
 
 export default router;
