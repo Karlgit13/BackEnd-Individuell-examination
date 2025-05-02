@@ -25,15 +25,15 @@ const router = express.Router();
  *         description: Ej auktoriserad
  */
 
-// GET /api/notes - Hämta alla anteckningar för inloggad användare
+// en GET-route defineras för att hämta anteckningar
+// den skyddas av authenticate-middleware vilket innebär att endast inloggade användare får åtkomst.
+// i try-satsen hämtas alla anteckningar som tillhör den inloggade användaren och skickar status 200 OK
+// catch fångar errror och returnerar 500 server error.
 router.get('/', authenticate, async (req, res) => {
     try {
-        // Hämtar alla anteckningar som tillhör den inloggade användaren (req.user.id kommer från token)
         const notes = await noteDb.find({ userId: req.user.id });
-        // Skickar tillbaka anteckningarna med status 200 OK
         res.status(200).json(notes);
     } catch (error) {
-        // Om något går fel returneras 500 Server error
         res.status(500).json({ error: 'Kunde inte hämta anteckningar' });
     }
 });
@@ -68,18 +68,21 @@ router.get('/', authenticate, async (req, res) => {
  *         description: Ej auktoriserad
  */
 
-// POST /api/notes - Skapa en ny anteckning
+// definerar en POST-route för att skapa anteckningar
+// authenticate middleware körs
+// title och text plockas ut från request body
+// title och text valideras
+// en ny anteckninig skapas och sparas i databasen
+// när anteckningen sparats skickas den tillbaka till klienten med status 200 OK
+// om något går fel fångas felet och ett svar med status 500 skickas tillbaka
 router.post('/', authenticate, async (req, res) => {
-    // Plockar ut title och text från request body
     const { title, text } = req.body;
 
-    // Validerar att title och text finns och inte överskrider maxlängder
     if (!title || title.length > 50 || !text || text.length > 300) {
         return res.status(400).json({ error: 'Ogiltig anteckning' });
     }
 
     try {
-        // Skapar en ny anteckning
         const newNote = {
             title,
             text,
@@ -87,9 +90,7 @@ router.post('/', authenticate, async (req, res) => {
             modifiedAt: new Date(),
             userId: req.user.id, // Kopplar anteckningen till den inloggade användaren
         };
-        // Sparar anteckningen i databasen
         const savedNote = await noteDb.insert(newNote);
-        // Returnerar den sparade anteckningen
         res.status(200).json(savedNote);
     } catch (error) {
         res.status(500).json({ error: 'Kunde inte spara anteckning' });
@@ -135,31 +136,30 @@ router.post('/', authenticate, async (req, res) => {
  *         description: Ej auktoriserad
  */
 
-// PUT /api/notes/:id - Uppdatera en anteckning
+// definerar en PUT-route för att uppdatera anteckningar
+// authenticate middleware körs
+// title och text plockas från req body och valideras
+// antecknings id plockas ut från URL-parametrarna
+// anteckning letas upp och om anteckning inte hittas returneras status 404 med ett meddelande
+// anteckningens data uppdateras, sparas i databasen och returnerar status 200 OK
+// catch fångar error och returnerar status 500
 router.put('/:id', authenticate, async (req, res) => {
-    // Plockar ut title och text från request body
     const { title, text } = req.body;
-    // Plockar ut anteckningens id från URL-parametrarna
     const { id } = req.params;
 
-    // Validerar att title och text är korrekta
     if (!title || title.length > 50 || !text || text.length > 300) {
         return res.status(400).json({ error: 'Ogiltig anteckning' });
     }
 
     try {
-        // Letar upp anteckningen som ska uppdateras och som tillhör rätt användare
         const note = await noteDb.findOne({ _id: id, userId: req.user.id });
         if (!note) return res.status(404).json({ error: 'Anteckning ej funnen' });
 
-        // Uppdaterar anteckningens data
         note.title = title;
         note.text = text;
         note.modifiedAt = new Date();
 
-        // Sparar ändringarna i databasen
         await noteDb.update({ _id: id }, note);
-        // Skickar tillbaka den uppdaterade anteckningen
         res.status(200).json(note);
     } catch (error) {
         res.status(500).json({ error: 'Kunde inte uppdatera anteckning' });
@@ -189,19 +189,19 @@ router.put('/:id', authenticate, async (req, res) => {
  *         description: Ej auktoriserad
  */
 
-// DELETE /api/notes/:id - Radera en anteckning
+// definerar en DELETE-route för att radera anteckningar
+// authenticate middleware körs
+// id plockas ut från URL-parametrar
+// Letar upp anteckningen som ska raderas och kontrollerar att den tillhör rätt användare
+// anteckningen tas bort och returnerar status 200 OK
 router.delete('/:id', authenticate, async (req, res) => {
-    // Plockar ut anteckningens id från URL-parametrarna
     const { id } = req.params;
 
     try {
-        // Letar upp anteckningen som ska raderas och kontrollerar att den tillhör rätt användare
         const note = await noteDb.findOne({ _id: id, userId: req.user.id });
         if (!note) return res.status(404).json({ error: 'Anteckning ej funnen' });
 
-        // Tar bort anteckningen från databasen
         await noteDb.remove({ _id: id });
-        // Skickar tillbaka en bekräftelse på borttagning
         res.status(200).json({ message: 'Anteckning borttagen' });
     } catch (error) {
         res.status(500).json({ error: 'Kunde inte ta bort anteckning' });
@@ -239,7 +239,11 @@ router.delete('/:id', authenticate, async (req, res) => {
  *         description: Ej auktoriserad
  */
 
-// GET /api/notes/search - Söka bland anteckningar efter titel
+// definerar en GET-route för att söka efter anteckningar
+// authenticate middleware körs
+// title hämtas från URL-parametrar
+// om title inte hittas returneras status 400 med meddelande
+// om title hittas returneras status 200 OK
 router.get('/search', authenticate, async (req, res) => {
     const { title } = req.query;
 

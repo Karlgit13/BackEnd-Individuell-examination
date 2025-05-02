@@ -10,6 +10,7 @@ Packages: <br>
 "nedb-promises": "^6.2.3",<br>
 "swagger-jsdoc": "^6.2.8",<br>
 "swagger-ui-express": "^5.0.1"<br>
+"nodemon": "^3.1.9"
 
 npm install <br>
 npm run dev

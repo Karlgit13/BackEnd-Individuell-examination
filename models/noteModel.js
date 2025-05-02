@@ -2,10 +2,10 @@
 import Datastore from 'nedb-promises';
 
 // Skapar en databasinstans för anteckningar (notes) med konfiguration
+// filen där alla anteckningar sparas
+// autoload gör så att databasen laddas automatiskt när servern startar
 const noteDb = Datastore.create({
-    // Filen där alla anteckningar sparas
     filename: './db/notes.db',
-    // Gör så att databasen laddas automatiskt när servern startar
     autoload: true
 });
 

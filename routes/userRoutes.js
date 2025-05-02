@@ -1,17 +1,17 @@
 // routes/userRoutes.js
 
+// Laddar in miljövariabler från .env-filen
 import dotenv from 'dotenv';
-dotenv.config(); // ← Lägg till detta först!
+dotenv.config(); // ← Viktigt att detta körs tidigt för att kunna läsa JWT_SECRET
 
+// Importerar nödvändiga moduler
+import express from 'express'; // Express för att skapa routes
+import bcrypt from 'bcryptjs'; // bcryptjs för att hasha lösenord
+import jwt from 'jsonwebtoken'; // jsonwebtoken för att skapa JWT-tokens
+import userDb from '../models/userModel.js'; // Användarmodell (NeDB)
 
-import express from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import userDb from '../models/userModel.js';
-
-
-const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+const router = express.Router(); // Skapar en routerinstans
+const JWT_SECRET = process.env.JWT_SECRET; // Läser in JWT-hemlighet från miljövariabel
 
 /**
  * @swagger
@@ -37,24 +37,32 @@ const JWT_SECRET = process.env.JWT_SECRET;
  *         description: Ogiltiga inloggningsuppgifter
  */
 
-// POST /api/user/signup
+// POST /api/user/signup - Skapa ett nytt konto
 router.post('/signup', async (req, res) => {
+    // Hämtar användarnamn och lösenord från request body
     const { username, password } = req.body;
 
+    // Kontrollerar att båda fälten finns och att lösenordet är tillräckligt långt
     if (!username || !password || password.length < 5) {
         return res.status(400).json({ error: 'Ogiltiga inloggningsuppgifter' });
     }
 
+    // Kollar om användarnamnet redan finns i databasen
     const existingUser = await userDb.findOne({ username });
     if (existingUser) {
         return res.status(400).json({ error: 'Användarnamn finns redan' });
     }
 
+    // Hashar lösenordet med bcrypt (10 rundor)
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Skapar en ny användare och sparar i databasen
     const newUser = await userDb.insert({ username, password: hashedPassword });
 
+    // Skickar tillbaka bekräftelse om att kontot skapats
     res.status(200).json({ message: 'Konto skapat' });
 });
+
 
 
 /**
@@ -88,21 +96,34 @@ router.post('/signup', async (req, res) => {
  *         description: Fel användarnamn eller lösenord
  */
 
-// POST /api/user/login
+// POST /api/user/login - Logga in och få en JWT-token
 router.post('/login', async (req, res) => {
+    // Hämtar användarnamn och lösenord från request body
     const { username, password } = req.body;
 
+    // Försöker hitta användaren i databasen
     const user = await userDb.findOne({ username });
+
+    // Om ingen användare hittas, returnera fel
     if (!user) return res.status(400).json({ error: 'Fel användarnamn eller lösenord' });
 
+    // Jämför det inmatade lösenordet med det hashade lösenordet i databasen
     const valid = await bcrypt.compare(password, user.password);
+
+    // Om lösenordet inte stämmer, returnera fel
     if (!valid) return res.status(400).json({ error: 'Fel användarnamn eller lösenord' });
 
-    const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, {
-        expiresIn: '1h'
-    });
+    // Skapar en JWT-token som innehåller användarens id och namn
+    // Token är giltig i 1 timme
+    const token = jwt.sign(
+        { id: user._id, username: user.username },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+    );
 
+    // Skickar tillbaka token till klienten
     res.status(200).json({ token });
 });
+
 
 export default router;
